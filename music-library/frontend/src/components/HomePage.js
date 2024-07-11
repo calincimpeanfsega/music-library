@@ -89,7 +89,7 @@ const HomePage = () => {
                         <p style={styles.songInfo}>Artist: {song.artist}</p>
                         <p style={styles.songInfo}>Album: {song.album}</p>
                         <p style={styles.songInfo}>Length: {song.length}</p>
-                        {/* <p style={styles.songInfo}>Description: {song.description}</p> */}
+                        <p style={styles.songInfo}>Description: {song.description}</p>
                     </div>
                 ))}
             </div>
