@@ -16,5 +16,5 @@ const artistSchema = new mongoose.Schema({
     albums: [albumSchema]
 });
 
-const Album = mongoose.model('Album', albumSchema);
-export default Album;
+const Artist = mongoose.model('Artist', artistSchema);
+export default Artist;

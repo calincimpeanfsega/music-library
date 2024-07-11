@@ -1,5 +1,3 @@
-// src/components/AlbumList.js
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -37,13 +35,20 @@ const AlbumList = () => {
             <ul>
                 {albums.map(album => (
                     <li key={album._id}>
-                        <h2>{album.title}</h2>
-                        <p>Artist: {album.artist}</p>
-                        <p>Release Year: {album.year}</p>
-                        <p>{album.description}</p>
+                        <h2>{album.name}</h2>
                         <ul>
-                            {album.songs.map((song, index) => (
-                                <li key={index}>{song}</li>
+                            {album.albums.map((subAlbum, index) => (
+                                <li key={index}>
+                                    <h3>{subAlbum.title}</h3>
+                                    <p>{subAlbum.description}</p>
+                                    <ul>
+                                        {subAlbum.songs.map((song, idx) => (
+                                            <li key={idx}>
+                                                {song.title} - {song.length}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
                             ))}
                         </ul>
                     </li>
