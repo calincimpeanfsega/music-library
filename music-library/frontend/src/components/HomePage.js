@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Navbar from './Navbar';
 
 const HomePage = () => {
     const [songs, setSongs] = useState([]);
@@ -79,6 +80,7 @@ const HomePage = () => {
 
     return (
         <div style={styles.container}>
+            <Navbar />
             <h1 style={styles.heading}>All Songs</h1>
             <form onSubmit={handleSearch} style={styles.searchForm}>
                 <input

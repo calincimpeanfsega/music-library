@@ -62,15 +62,27 @@ router.put('/:id', getAlbum, async (req, res) => {
     }
 });
 
-// DELETE an album
-router.delete('/:id', getAlbum, async (req, res) => {
+router.delete('/:id', async (req, res) => {
+    const albumId = req.params.id;
+
     try {
-        await res.album.remove();
+        // Find the album by ID
+        const album = await Album.findById(albumId);
+
+        if (!album) {
+            return res.status(404).json({ message: 'Album not found' });
+        }
+
+        // Delete the album
+        await Album.deleteOne({ _id: album._id });
+
         res.json({ message: 'Deleted Album' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
     }
 });
+
 
 async function getAlbum(req, res, next) {
     let album;

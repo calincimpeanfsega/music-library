@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
+import Navbar from './Navbar'; // Assuming Navbar component is defined
 
 const AlbumPage = () => {
     const [albums, setAlbums] = useState([]);
@@ -12,6 +13,7 @@ const AlbumPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Fetch albums from backend
     const fetchAlbums = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/albums');
@@ -30,18 +32,21 @@ const AlbumPage = () => {
         fetchAlbums();
     }, []);
 
+    // Open modal to create or edit album
     const openModal = (album = null) => {
         setSelectedAlbum(album);
         setIsCreateMode(!album);
         setIsModalOpen(true);
     };
 
+    // Close modal
     const closeModal = () => {
         setSelectedAlbum(null);
         setIsModalOpen(false);
         setIsCreateMode(false);
     };
 
+    // Handle input change for album form fields
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (isCreateMode) {
@@ -51,6 +56,7 @@ const AlbumPage = () => {
         }
     };
 
+    // Handle song change for album form fields
     const handleSongChange = (index, e) => {
         const { name, value } = e.target;
         const songs = isCreateMode ? [...newAlbum.songs] : [...selectedAlbum.songs];
@@ -62,6 +68,7 @@ const AlbumPage = () => {
         }
     };
 
+    // Add new song field to album form
     const addNewSongField = () => {
         const songs = isCreateMode ? [...newAlbum.songs, { title: '', length: '' }] : [...selectedAlbum.songs, { title: '', length: '' }];
         if (isCreateMode) {
@@ -71,31 +78,19 @@ const AlbumPage = () => {
         }
     };
 
-    // const handleCreateAlbum = async () => {
-    //     try {
-    //         await axios.post('http://localhost:5000/api/albums', newAlbum);
-    //         setNewAlbum({ title: '', artist: '', description: '', songs: [{ title: '', length: '' }] });
-    //         fetchAlbums();
-    //         closeModal();
-    //     } catch (err) {
-    //         setError(err);
-    //     }
-    // };
+    // Create a new album
+    const handleCreateAlbum = async () => {
+        try {
+            await axios.post('http://localhost:5000/api/albums', newAlbum);
+            setNewAlbum({ title: '', artist: '', description: '', songs: [{ title: '', length: '' }] });
+            fetchAlbums();
+            closeModal();
+        } catch (err) {
+            setError(err);
+        }
+    };
 
-    // const handleUpdateAlbum = async () => {
-    //     try {
-    //         if (isCreateMode) {
-    //             await axios.post('http://localhost:5000/api/albums', newAlbum); // Assuming this creates a new album
-    //         } else {
-    //             const { _id, ...albumData } = selectedAlbum; // Destructure _id and exclude it from the payload
-    //             await axios.put(`http://localhost:5000/api/albums/${_id}`, albumData); // Assuming this updates an existing album
-    //         }
-    //         fetchAlbums();
-    //         closeModal();
-    //     } catch (err) {
-    //         setError(err);
-    //     }
-    // };
+    // Update an existing album
     const handleUpdateAlbum = async () => {
         try {
             const { _id, ...albumData } = selectedAlbum; // Destructure _id and exclude it from the payload
@@ -106,27 +101,18 @@ const AlbumPage = () => {
             setError(err);
         }
     };
-    
-    const handleCreateAlbum = async () => {
-        try {
-            await axios.post('http://localhost:5000/api/albums', newAlbum); // Use POST method for creating a new album
-            setNewAlbum({ title: '', artist: '', description: '', songs: [{ title: '', length: '' }] });
-            fetchAlbums();
-            closeModal();
-        } catch (err) {
-            setError(err);
-        }
-    };
-    
 
-    const handleDeleteAlbum = async (id) => {
+    const handleDeleteAlbum = async () => {
         try {
-            await axios.delete(`http://localhost:5000/api/albums/${id}`);
-            fetchAlbums();
+            await axios.delete(`http://localhost:5000/api/albums/${selectedAlbum._id}`);
+            fetchAlbums(); // Refresh albums after deletion
+            closeModal(); // Close modal after successful deletion
         } catch (err) {
-            setError(err);
+            console.error("Error deleting album:", err);
+            setError(err.response.data.message || 'Failed to delete album'); // Set error state with appropriate message
         }
     };
+    
 
     if (loading) {
         return <p>Loading albums...</p>;
@@ -138,6 +124,7 @@ const AlbumPage = () => {
 
     return (
         <div style={styles.container}>
+            <Navbar /> {/* Assuming Navbar component is defined */}
             <h1 style={styles.heading}>All Albums</h1>
             <div style={styles.albumList}>
                 <div style={styles.albumBox} onClick={() => openModal(null)}>
@@ -251,6 +238,7 @@ const AlbumPage = () => {
                             ))}
                             <button onClick={addNewSongField} style={styles.button}>+ Add Song</button>
                             <button onClick={handleUpdateAlbum} style={styles.button}>Update Album</button>
+                            <button onClick={handleDeleteAlbum} style={styles.deleteButton}>Delete Album</button>
                         </>
                     )}
                     <button onClick={closeModal} style={styles.closeButton}>Close</button>
@@ -312,6 +300,16 @@ const styles = {
     button: {
         padding: '10px 20px',
         backgroundColor: '#007bff',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '1rem',
+        marginRight: '10px',
+    },
+    deleteButton: {
+        padding: '10px 20px',
+        backgroundColor: '#dc3545',
         color: '#fff',
         border: 'none',
         borderRadius: '5px',
