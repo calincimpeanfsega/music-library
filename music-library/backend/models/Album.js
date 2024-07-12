@@ -8,6 +8,7 @@ const songSchema = new mongoose.Schema({
 const albumSchema = new mongoose.Schema({
     title: String,
     songs: [songSchema],
+    artist: String,
     description: String
 });
 

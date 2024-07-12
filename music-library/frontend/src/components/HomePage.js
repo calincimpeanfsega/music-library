@@ -11,23 +11,37 @@ const HomePage = () => {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/albums'); // Fetch data from /api/albums
+                const response = await axios.get('http://localhost:5000/api/albums');
                 const albums = response.data;
-                const allSongs = [];
 
-                albums.forEach(album => {
-                    album.albums.forEach(a => {
-                        a.songs.forEach(song => {
-                            allSongs.push({
+                // Flatten the albums and their songs into a single array of songs
+                const allSongs = albums.reduce((acc, album) => {
+                    // Check if the album has 'albums' property, and flatten the songs
+                    if (album.albums && album.albums.length > 0) {
+                        const albumSongs = album.albums.flatMap(a => {
+                            return a.songs.map(song => ({
                                 title: song.title,
                                 length: song.length,
                                 artist: album.name,
                                 album: a.title,
-                                description: a.description,
-                            });
+                                // description: a.description, // Commented out description
+                            }));
                         });
-                    });
-                });
+                        acc.push(...albumSongs);
+                    }
+                    // Check if the album has 'songs' property and flatten them
+                    if (album.songs && album.songs.length > 0) {
+                        const standaloneSongs = album.songs.map(song => ({
+                            title: song.title,
+                            length: song.length,
+                            artist: album.artist || album.name,
+                            album: album.title || 'Single',
+                            // description: album.description || '', // Commented out description
+                        }));
+                        acc.push(...standaloneSongs);
+                    }
+                    return acc;
+                }, []);
 
                 setSongs(allSongs);
                 setFilteredSongs(allSongs);
@@ -73,13 +87,7 @@ const HomePage = () => {
                     onChange={handleSearchChange}
                     placeholder="Search for a song..."
                     style={styles.searchInput}
-                    list="song-titles"
                 />
-                <datalist id="song-titles">
-                    {songs.map((song, index) => (
-                        <option key={index} value={song.title} />
-                    ))}
-                </datalist>
                 <button type="submit" style={styles.searchButton}>Search</button>
             </form>
             <div style={styles.songList}>
@@ -89,6 +97,7 @@ const HomePage = () => {
                         <p style={styles.songInfo}>Artist: {song.artist}</p>
                         <p style={styles.songInfo}>Album: {song.album}</p>
                         <p style={styles.songInfo}>Length: {song.length}</p>
+                        {/* Commented out description */}
                         {/* <p style={styles.songInfo}>Description: {song.description}</p> */}
                     </div>
                 ))}
@@ -97,7 +106,6 @@ const HomePage = () => {
     );
 };
 
-// Inline styles
 const styles = {
     container: {
         maxWidth: '800px',
@@ -111,20 +119,21 @@ const styles = {
         color: '#333',
     },
     searchForm: {
+        display: 'flex',
+        justifyContent: 'center',
         marginBottom: '20px',
     },
     searchInput: {
         padding: '10px',
         fontSize: '1rem',
-        borderRadius: '5px',
+        borderRadius: '5px 0 0 5px',
         border: '1px solid #ccc',
-        width: '70%',
-        marginRight: '10px',
+        flex: '1',
     },
     searchButton: {
         padding: '10px 20px',
         fontSize: '1rem',
-        borderRadius: '5px',
+        borderRadius: '0 5px 5px 0',
         border: 'none',
         backgroundColor: '#333',
         color: '#fff',
@@ -134,12 +143,14 @@ const styles = {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
         gap: '20px',
+        marginTop: '20px',
     },
     songBox: {
         padding: '15px',
         border: '1px solid #ccc',
         borderRadius: '5px',
         backgroundColor: '#f9f9f9',
+        textAlign: 'left',
     },
     songTitle: {
         fontSize: '1.5rem',
